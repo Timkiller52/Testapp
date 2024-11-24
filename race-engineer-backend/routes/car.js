@@ -1,14 +1,15 @@
 const express = require("express");
 const Car = require("../models/Car");
+
 const router = express.Router();
 
 // Get all cars
 router.get("/", async (req, res) => {
   try {
-    const cars = await Car.find();
+    const cars = await Car.findAll();
     res.json(cars);
-  } catch (error) {
-    console.error("Error fetching cars:", error);
+  } catch (err) {
+    console.error("Error fetching cars:", err);
     res.status(500).json({ message: "Error fetching cars" });
   }
 });
@@ -18,11 +19,10 @@ router.post("/", async (req, res) => {
   const { make, model, category, image } = req.body;
 
   try {
-    const newCar = new Car({ make, model, category, image });
-    await newCar.save();
+    const newCar = await Car.create({ make, model, category, image });
     res.status(201).json(newCar);
-  } catch (error) {
-    console.error("Error adding car:", error);
+  } catch (err) {
+    console.error("Error adding car:", err);
     res.status(500).json({ message: "Error adding car" });
   }
 });
@@ -33,16 +33,15 @@ router.put("/:id", async (req, res) => {
   const { make, model, category, image } = req.body;
 
   try {
-    const updatedCar = await Car.findByIdAndUpdate(
-      id,
-      { make, model, category, image },
-      { new: true }
-    );
-    if (!updatedCar) return res.status(404).json({ message: "Car not found" });
+    const car = await Car.findByPk(id);
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
+    }
 
-    res.json(updatedCar);
-  } catch (error) {
-    console.error("Error updating car:", error);
+    await car.update({ make, model, category, image });
+    res.json(car);
+  } catch (err) {
+    console.error("Error updating car:", err);
     res.status(500).json({ message: "Error updating car" });
   }
 });
@@ -52,12 +51,15 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedCar = await Car.findByIdAndDelete(id);
-    if (!deletedCar) return res.status(404).json({ message: "Car not found" });
+    const car = await Car.findByPk(id);
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
+    }
 
+    await car.destroy();
     res.json({ message: "Car deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting car:", error);
+  } catch (err) {
+    console.error("Error deleting car:", err);
     res.status(500).json({ message: "Error deleting car" });
   }
 });

@@ -1,10 +1,24 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../database"); // Import database connection
 
-const CarSchema = new mongoose.Schema({
-  make: { type: String, required: true },
-  model: { type: String, required: true },
-  category: { type: String, required: true },
-  image: { type: String, default: "" }, // Optional car image URL
+// Define the Car model
+const Car = sequelize.define("Car", {
+  make: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  model: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  category: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  image: {
+    type: DataTypes.STRING, // Optional URL for the car image
+    allowNull: true,
+  },
 });
 
-module.exports = mongoose.model("Car", CarSchema);
+module.exports = Car;
